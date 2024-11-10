@@ -4,7 +4,8 @@ import tf from '@tensorflow/tfjs-node'
 import use from '@tensorflow-models/universal-sentence-encoder'
 import tkit from 'terminal-kit'
 
-import {authorizeUser, getUserPlaylists, SpotifyPlaylist} from './songs/songs.js'
+import {addSongsToDb, authorizeUser, getUserPlaylists, SpotifyPlaylist} from './songs/songs.js'
+import Database from "better-sqlite3"
 
 
 const term = tkit.realTerminal
@@ -112,19 +113,35 @@ async function promptUserToSelectPlaylist(playlists: Array<SpotifyPlaylist>) {
   return playlists[selection.selectedIndex]
 }
 
+const createDatabase = () => {
+  const db = new Database('lyrical.db')
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS songs (
+      name TEXT NOT NULL,
+      artist TEXT NOT NULL,
+      lyrics TEXT NULL,
+      punctuatedLyrics TEXT NULL,
+      embedding JSON NULL
+    );
+  `).run()
+  db.pragma('journal_mode = WAL');
+  return db
+}
+
 async function main() {
   const accessToken = await authorizeUser()
   const playlists = await getUserPlaylists(accessToken)
-  const selectedPlaylist = promptUserToSelectPlaylist(playlists)
-  //addSongsToDb()
-  //addLyricsToDb()
+  const selectedPlaylist = await promptUserToSelectPlaylist(playlists)
+  const database = createDatabase()
+  await addSongsToDb(accessToken, selectedPlaylist, database)
+  // await addLyricsToDb()
   //punctuateDbLyrics()
   //addEmbeddingsToDb()
   //if not finished, clear state, erase db, etc.
   //save current playlist selection so user doesn't need to repeat next time unless they choose to
   //promptUserForInput()
   //findMatchingSongs(n) (n is number of songs to match)
-  term( '\n\n' ).eraseLineAfter.green("Selected: %s\n", (await selectedPlaylist).name)
+  //term( '\n\n' ).eraseLineAfter.green("Selected: %s\n", (await selectedPlaylist).name)
   process.exit()
 }
 

@@ -2,6 +2,7 @@ import express from "express";
 import axios from "axios";
 import querystring from "querystring";
 import openUrl from 'open';
+import { Database } from "better-sqlite3";
 
 const CLIENT_ID = "02300507b975448daab576cb6243a18c";
 const CLIENT_SECRET = "a7b9f7252ea6439288a183d5d77e7daf";
@@ -17,6 +18,17 @@ export interface SpotifyPlaylist {
     href: string,
     count: number
   }
+}
+
+export interface SpotifySong {
+  id: string,
+  name: string,
+  artists: Array<SpotifyArtist>
+}
+
+export interface SpotifyArtist {
+  id: string,
+  name: string,
 }
 
 export const authorizeUser = (): Promise<string> => {
@@ -66,21 +78,45 @@ export const authorizeUser = (): Promise<string> => {
   })
 }
 
-export const getUserPlaylists = async (accessToken: string): Promise<Array<SpotifyPlaylist>> => {
-  try {
-    const response = await axios.get('https://api.spotify.com/v1/me/playlists', {
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-        }
-    });
-
-    if (response.status === 200) {
-      return response.data.items
-    } else {
-      throw new Error(`Error: ${response.status} - ${response.statusText}`)
+export const getUserPlaylists = async (
+  accessToken: string
+): Promise<Array<SpotifyPlaylist>> => {
+  const response = await axios.get(
+    'https://api.spotify.com/v1/me/playlists', 
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
     }
-  } catch (error) {
-      throw error
+  )
+  if (response.status === 200) {
+    return response.data.items
+  } else {
+    throw new Error(`Error: ${response.status} - ${response.statusText}`)
   }
+}
+
+export const addSongsToDb = async (
+  accessToken: string, 
+  playlist: SpotifyPlaylist, 
+  db: Database 
+) => {
+  //TODO: is only getting 100 at a time it seems
+  const response = await axios.get(
+    playlist.tracks.href,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  )
+  const playlistSongs: Array<SpotifySong> = (response.data.items as Array<any>).map(item => item.track)
+  const insertStatement = db.prepare(
+    'INSERT INTO songs (name, artist) VALUES (@name, @artist)'
+  )
+  db.transaction((songs)=>{
+    for (const song of songs) insertStatement.run(song);
+  })(playlistSongs.map(item => ({name: item.name, artist: item.artists[0].name })))
 }
