@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "pretest": "npx tsc",
     "test": "node test.js",
     "prestart": "npx tsc",
     "start": "node build/index.js"
