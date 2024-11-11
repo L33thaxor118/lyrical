@@ -2,7 +2,7 @@ import express from "express";
 import axios from "axios";
 import querystring from "querystring";
 import openUrl from 'open';
-import { Database } from "better-sqlite3";
+import Database from "better-sqlite3";
 
 const CLIENT_ID = "02300507b975448daab576cb6243a18c";
 const CLIENT_SECRET = "a7b9f7252ea6439288a183d5d77e7daf";
@@ -99,11 +99,10 @@ export const getUserPlaylists = async (
 
 export const addSongsToDb = async (
   accessToken: string, 
-  playlist: SpotifyPlaylist, 
-  db: Database 
+  playlist: SpotifyPlaylist
 ) => {
-  //TODO: is only getting 100 at a time it seems
-  const response = await axios.get(
+  const db = new Database('lyrical.db')
+  const response = await axios.get( //TODO: is only getting 100 at a time it seems
     playlist.tracks.href,
     {
       headers: {
@@ -119,4 +118,5 @@ export const addSongsToDb = async (
   db.transaction((songs)=>{
     for (const song of songs) insertStatement.run(song);
   })(playlistSongs.map(item => ({name: item.name, artist: item.artists[0].name })))
+  db.close()
 }
