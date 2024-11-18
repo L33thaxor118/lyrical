@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Say what you want with music",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "pretest": "npx tsc",
     "test": "node build/test.js",
