@@ -2,13 +2,12 @@
   "name": "lyrical",
   "version": "1.0.0",
   "description": "Say what you want with music",
-  "main": "index.js",
   "type": "module",
   "scripts": {
     "pretest": "npx tsc",
-    "test": "node test.js",
+    "test": "node build/test.js",
     "prestart": "npx tsc",
-    "start": "node build/index.js"
+    "start": "node build/main.js"
   },
   "repository": {
     "type": "git",
@@ -27,6 +26,7 @@
     "axios": "^1.7.7",
     "better-sqlite3": "^11.5.0",
     "compute-cosine-similarity": "^1.1.0",
+    "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "genius-lyrics-api": "^3.2.1",
     "level": "^8.0.1",
