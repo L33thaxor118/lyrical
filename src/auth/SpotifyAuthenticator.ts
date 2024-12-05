@@ -7,6 +7,8 @@ import { Authenticator } from "./Authenticator"
 
 export class SpotifyAuthenticator implements Authenticator {
 
+    private callbackPort = 8888
+
     private async waitForCodeOnCallbackServer(): Promise<string> {
         return new Promise((resolve, reject)=>{
             const expressApp = express()
@@ -22,7 +24,7 @@ export class SpotifyAuthenticator implements Authenticator {
                     resolve(code)
                 }
             })
-            callbackServer.listen(8888)
+            callbackServer.listen(this.callbackPort)
         })
     }
 
@@ -36,7 +38,7 @@ export class SpotifyAuthenticator implements Authenticator {
                 axios.post("https://accounts.spotify.com/api/token", querystring.stringify({
                     grant_type: "authorization_code",
                     code: code,
-                    redirect_uri: "http://localhost:8888/callback",
+                    redirect_uri: `http://localhost:${this.callbackPort}/callback`,
                     client_id: process.env.SPOTIFY_CLIENT_ID,
                     client_secret: process.env.SPOTIFY_CLIENT_SECRET,
                 })).then((response)=>{
@@ -48,7 +50,7 @@ export class SpotifyAuthenticator implements Authenticator {
             const authUrl = `https://accounts.spotify.com/authorize?${querystring.stringify({
                 client_id: process.env.SPOTIFY_CLIENT_ID,
                 response_type: "code",
-                redirect_uri: "http://localhost:8888/callback",
+                redirect_uri: `http://localhost:${this.callbackPort}/callback`,
                 scope: "playlist-read-private",
             })}`
             openUrl(authUrl)

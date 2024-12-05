@@ -1,40 +1,35 @@
 import { Authenticator } from "./auth/SpotifyAuthenticator"
 import { LyricsRepository } from "./data/lyrics/LyricsRepository"
-import { Settings, SettingsRepository } from "./data/settings/SettingsRepository"
-import { MusicRepository, Playlist } from "./data/music/MusicRepository"
+import { SettingsRepository } from "./data/settings/SettingsRepository"
+import { MusicRepository } from "./data/music/MusicRepository"
 import { TerminalUI } from "./ui/TerminalUI"
-import { getErrorMessage } from "./util/util.js"
+import { delay, getErrorMessage } from "./util/util.js"
+import { LyricsPreprocessor } from "./data/preprocessing/LyricsPreprocessor"
+import { AppDatabase } from "./data/db/AppDatabase"
+import { Settings } from "./model/Settings"
+import { EmbeddingRepository } from "./data/embeddings/EmbeddingRepository"
+import { SpotifyPlaylist } from "./model/SpotifyPlaylist"
 
 export class Application {
-    private spotifyAuth: Authenticator
-    private geniusAuth: Authenticator
-    private musicRepo: MusicRepository
-    private lyricsRepo: LyricsRepository
-    private settingsRepo: SettingsRepository
-    private terminalUI: TerminalUI
-
     constructor(
-        spotifyAuthenticator: Authenticator,
-        geniusAuthenticator: Authenticator,
-        musicRepository: MusicRepository,
-        lyricsRepository: LyricsRepository,
-        settingsRepository: SettingsRepository,
-        terminalUI: TerminalUI
-    ) {
-        this.spotifyAuth = spotifyAuthenticator
-        this.geniusAuth = geniusAuthenticator
-        this.musicRepo = musicRepository
-        this.lyricsRepo= lyricsRepository
-        this.settingsRepo = settingsRepository
-        this.terminalUI = terminalUI
-    }
+        private spotifyAuth: Authenticator,
+        private geniusAuth: Authenticator,
+        private musicRepo: MusicRepository,
+        private lyricsRepo: LyricsRepository,
+        private settingsRepo: SettingsRepository,
+        private terminalUI: TerminalUI,
+        private lyricsPreprocessor: LyricsPreprocessor,
+        private embeddingRepo: EmbeddingRepository,
+        private database: AppDatabase
+    ) {}
   
     async run() {
         try {
             this.terminalUI.printBanner()
+            await this.database.connect()
             const settings = await this.settingsRepo.getSettings()
             this.terminalUI.printLine("Welcome to Lyrical!")
-            if (settings.loadedPlaylistName === undefined) {
+            if (settings?.loadedPlaylistName == null) {
                 this.terminalUI.printLine("In order to fetch songs and lyrics you will need to authenticate with Spotify and Genius.")
                 const answer = await this.terminalUI.printYesNoQuestion("Proceed?")
                 if (answer === false) {
@@ -49,41 +44,63 @@ export class Application {
                 this.terminalUI.printSuccessLine("Done")
                 await this.terminalUI.printLoading("Fetching your Spotify playlists")
                 const playlists = await this.musicRepo.getPlaylists(spotifyToken)
-                const selection = await this.terminalUI.printOptions("Choose a playlist:", playlists.map(playlist => playlist.name))
+                const selection = await this.terminalUI.printOptions("Choose a playlist:", playlists.map(playlist => playlist?.name))
                 const selectedPlaylist = playlists[selection]
+                this.terminalUI.clear()
                 await this.terminalUI.printLoading(`loading ${selectedPlaylist.name}. This might take a while for large playlists.`)
-                await this.loadPlaylistIntoDatabase(selectedPlaylist, spotifyToken)
+                await this.loadPlaylistIntoDatabase(selectedPlaylist, spotifyToken, geniusToken)
                 await this.promptUserAndGetMatchingSong(settings)
             } else {
                 await this.promptUserAndGetMatchingSong(settings)
             }
         } catch(error) {
             this.terminalUI.printErrorLine(`Error: ${getErrorMessage(error)}. Shutting down.`)
+        } finally {
+            this.database.disconnect()
         }
     }
 
     private async promptUserAndGetMatchingSong(settings: Settings) {
-        this.terminalUI.printLine(`Loaded playlist: ${settings.loadedPlaylistName}`)
+        this.terminalUI.printLine(`Loaded playlist: ${settings?.loadedPlaylistName}`)
         const input = await this.terminalUI.printTextInput('Feed me a line: ')
-        const matchingSongName = await this.queryDatabaseForMatchingSong(input)
+        const inputEmbedding = await this.embeddingRepo.getEmbedding(input)
+        const matchingSongs = await this.database.similarityQuery(inputEmbedding)
         this.terminalUI.printNewLine()
-        this.terminalUI.printSuccessLine(matchingSongName)
-    }
-
-    private async loadPlaylistIntoDatabase(playlist: Playlist, accessToken: string) {
-        for await (const song of this.musicRepo.getSongsInPlaylist(playlist, accessToken)) {
-            // lyrics repo fetch lyrics for song
-            // repo will handle persisting to cache and getting from cache if available
-            // if no lyrics exist, or in other language, skip
-            // punctuate lyrics
-            // split into sentences
-            // get embeddings for each sentence
-            // collapse into single embedding via average
-            // insert song data, embedding and lyrics into database
+        for (const song of matchingSongs) {
+            this.terminalUI.printSuccessLine(`${song.title} by ${song.artist}`)
         }
     }
 
-    private async queryDatabaseForMatchingSong(input: string): Promise<string> {
-        return "some song"
+    private async loadPlaylistIntoDatabase(playlist: SpotifyPlaylist, spotifyAccessToken: string, geniusAccessToken: string) {
+        const updateProgress = this.terminalUI.printProgress("Loading songs in playlist...")
+        var processedSongs = 0
+        try {
+            await this.database.beginTransaction()
+            for await (const song of this.musicRepo.getSongsInPlaylist(playlist, spotifyAccessToken)) {
+                const artistName = song.artists[0]?.name
+                if (artistName == null) {
+                    continue
+                }
+                const lyrics = await this.lyricsRepo.getLyrics(geniusAccessToken, song.name, artistName)
+                if (lyrics == null) {
+                    continue
+                }
+                const preprocessedLyrics = this.lyricsPreprocessor.preprocessLyrics(lyrics)
+                if (preprocessedLyrics == null) {
+                    continue
+                }
+                const embedding = await this.embeddingRepo.getEmbedding(preprocessedLyrics)
+                await this.database.insertSong(song.name, song.artists[0].name, lyrics, embedding)
+
+                // Throttle so we don't exceed API limits
+                delay(1000)
+                updateProgress(++processedSongs / playlist.tracks.count)
+            }
+            await this.settingsRepo.updateSettings({loadedPlaylistName: playlist.name})
+            await this.database.commitTransaction()
+        } catch(e) {
+            await this.database.rollbackTransaction()
+            throw e
+        }
     }
 }

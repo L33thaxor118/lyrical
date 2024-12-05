@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  embedding_server:
+    build:
+      context: ./nlp
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5000"
+  vector_database:
+    image: pgvector/pgvector:pg16
+    container_name: vector-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: whatever
+      POSTGRES_DB: lyrical
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+    restart: unless-stopped
+volumes:
+  pgvector_data:

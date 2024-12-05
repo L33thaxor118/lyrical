@@ -1,5 +1,3 @@
-
-
 export interface LyricsRepository {
-    getLyrics(): Promise<Array<string>>
+    getLyrics(accessToken: string, songName: string, artistName: string): Promise<string | null>
 }

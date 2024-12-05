@@ -8,4 +8,6 @@ export interface TerminalUI {
     printTextInput(title: string): Promise<string>
     printBanner(): void
     printNewLine(): void
+    printProgress(title: string): (progress: number)=>void
+    clear(): void
 }

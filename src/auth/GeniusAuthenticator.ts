@@ -6,6 +6,9 @@ import querystring from "querystring"
 import openUrl from 'open'
 
 export class GeniusAuthenticator implements Authenticator {
+
+    private callbackPort = 8889
+
     private async waitForCodeOnCallbackServer(): Promise<string> {
         return new Promise((resolve, reject)=>{
             const expressApp = express()
@@ -21,7 +24,7 @@ export class GeniusAuthenticator implements Authenticator {
                     resolve(code)
                 }
             })
-            callbackServer.listen(8888)
+            callbackServer.listen(this.callbackPort)
         })
     }
 
@@ -37,7 +40,7 @@ export class GeniusAuthenticator implements Authenticator {
                 axios.post("https://api.genius.com/oauth/token", querystring.stringify({
                     grant_type: "authorization_code",
                     code: code,
-                    redirect_uri: "http://localhost:8888/callback",
+                    redirect_uri: `http://localhost:${this.callbackPort}/callback`,
                     client_id: geniusClientId,
                     client_secret: geniusClientSecret,
                 })).then((response)=>{
@@ -49,7 +52,7 @@ export class GeniusAuthenticator implements Authenticator {
             const authUrl = `https://api.genius.com/oauth/authorize?${querystring.stringify({
                 client_id: geniusClientId,
                 response_type: "code",
-                redirect_uri: "http://localhost:8888/callback",
+                redirect_uri: `http://localhost:${this.callbackPort}/callback`,
                 state: "whatever",
                 scope: "me",
             })}`

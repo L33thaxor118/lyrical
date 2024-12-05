@@ -1,10 +1,16 @@
-import { Settings, SettingsRepository } from "./SettingsRepository";
+import { Settings } from "../../model/Settings.js";
+import { AppDatabase } from "../db/AppDatabase.js";
+import { SettingsRepository } from "./SettingsRepository.js";
 
 export class DefaultSettings implements SettingsRepository {
+    constructor(
+        private database: AppDatabase
+    ) {}  
+    
     getSettings(): Promise<Settings> {
-        throw new Error("Method not implemented.");
+        return this.database.getSettings()
     }
-    updateSettings(newSettings: Settings): Promise<Settings> {
-        throw new Error("Method not implemented.");
+    async updateSettings(newSettings: Settings) {
+        await this.database.updateSettings(newSettings)
     }
 }

@@ -1,10 +1,27 @@
-import { TerminalUI } from "./TerminalUI"
+import { TerminalUI } from "./TerminalUI.js"
 import tkit from 'terminal-kit'
                  
 
 export class DefaultTerminalUI implements TerminalUI {
 
     private term = tkit.realTerminal
+
+    clear(): void {
+        this.term.clear()
+    }
+    printProgress(title: string): (progress: number) => void {
+        const progressBar = this.term.progressBar(
+            {
+                width: 80 ,
+                title: title ,
+                eta: true ,
+                percent: true
+            }
+        )
+        return (progress: number) => {
+            progressBar.update(progress)
+        }
+    }
 
     async printTextInput(title: string): Promise<string> {
         this.term.yellow(title)
