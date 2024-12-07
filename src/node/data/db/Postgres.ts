@@ -106,7 +106,9 @@ export class Postgres implements AppDatabase {
             FROM Settings
         `
         const result = await this.client.query(settingsQuery)
-        return { 
+        if (result.rows.length === 0) {
+            return {}
+        } else return { 
             loadedPlaylistName: result.rows[0].loaded_playlist_name
         }
     }

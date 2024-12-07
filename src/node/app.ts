@@ -1,14 +1,14 @@
-import { Authenticator } from "./auth/SpotifyAuthenticator"
-import { LyricsRepository } from "./data/lyrics/LyricsRepository"
-import { SettingsRepository } from "./data/settings/SettingsRepository"
-import { MusicRepository } from "./data/music/MusicRepository"
+import { Authenticator } from "./auth/Authenticator"
+import { LyricsRepository } from "./data/lyrics/LyricsRepository.js"
+import { SettingsRepository } from "./data/settings/SettingsRepository.js"
+import { MusicRepository } from "./data/music/MusicRepository.js"
 import { TerminalUI } from "./ui/TerminalUI"
 import { delay, getErrorMessage } from "./util/util.js"
-import { LyricsPreprocessor } from "./data/preprocessing/LyricsPreprocessor"
-import { AppDatabase } from "./data/db/AppDatabase"
-import { Settings } from "./model/Settings"
-import { EmbeddingRepository } from "./data/embeddings/EmbeddingRepository"
-import { SpotifyPlaylist } from "./model/SpotifyPlaylist"
+import { LyricsPreprocessor } from "./data/preprocessing/LyricsPreprocessor.js"
+import { AppDatabase } from "./data/db/AppDatabase.js"
+import { Settings } from "./model/Settings.js"
+import { EmbeddingRepository } from "./data/embeddings/EmbeddingRepository.js"
+import { SpotifyPlaylist } from "./model/SpotifyPlaylist.js"
 
 export class Application {
     constructor(

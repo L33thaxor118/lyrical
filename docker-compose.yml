@@ -1,12 +1,13 @@
 version: '3.9'
 
 services:
-  embedding_server:
+  nlp_server:
     build:
-      context: ./nlp
-      dockerfile: Dockerfile
+      context: ./src/python
+      dockerfile: Dockerfile.nlpserver
     ports:
       - "5001:5000"
+
   vector_database:
     image: pgvector/pgvector:pg16
     container_name: vector-db
@@ -19,6 +20,7 @@ services:
     volumes:
       - pgvector_data:/var/lib/postgresql/data
     restart: unless-stopped
+
   test_vector_database:
     image: pgvector/pgvector:pg16
     container_name: test-vector-db
@@ -28,5 +30,12 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: whatever
       POSTGRES_DB: lyrical
+
+  jupyter_notebook:
+      build: 
+        context: ./src/python
+        dockerfile: Dockerfile.jupyternotebook
+      ports:
+      - "8888:8888"
 volumes:
   pgvector_data:

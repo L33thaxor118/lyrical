@@ -1,0 +1,24 @@
+# Use the official Jupyter TensorFlow image as the base
+FROM tensorflow/tensorflow:latest-jupyter
+
+# Install HuggingFace libraries and other dependencies
+RUN pip install --upgrade pip && pip install \
+    transformers \
+    datasets \
+    tokenizers \
+    matplotlib \
+    pandas
+
+# Optional: Set a default working directory
+WORKDIR /lyrical
+COPY test.ipynb .
+COPY nlp.py .
+COPY pre.py .
+COPY requirements.txt .
+COPY testlyrics testlyrics
+
+# Expose the Jupyter Notebook port
+EXPOSE 8888
+
+# Start Jupyter Notebook (optional override for ENTRYPOINT)
+CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=''"]

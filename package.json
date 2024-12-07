@@ -7,8 +7,9 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "buildservices": "docker-compose -f ./services/docker-compose.yml build",
-    "startservices": "docker-compose -f ./services/docker-compose.yml up --force-recreate",
+    "buildservices": "docker-compose -f ./docker-compose.yml build",
+    "startservices": "docker-compose -f ./docker-compose.yml up --force-recreate",
+    "notebook": "open http://localhost:8888/notebooks/test.ipynb",
     "pretest": "npx tsc",
     "test": "node build/test.js",
     "prestart": "npx tsc",
