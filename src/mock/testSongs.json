@@ -1,0 +1,32 @@
+[
+    {
+        "id": "0",
+        "name": "song0",
+        "artists": [
+            {
+                "id": "0",
+                "name": ""
+            }
+        ]
+    },
+    {
+        "id": "1",
+        "name": "song1",
+        "artists": [
+            {
+                "id": "1",
+                "name": ""
+            }
+        ]
+    },
+    {
+        "id": "2",
+        "name": "song2",
+        "artists": [
+            {
+                "id": "1",
+                "name": ""
+            }
+        ]
+    }
+]

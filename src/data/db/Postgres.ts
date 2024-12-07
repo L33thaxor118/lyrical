@@ -4,7 +4,7 @@ import { AppDatabase } from "./AppDatabase.js"
 import pg from 'pg'
 
 export class Postgres implements AppDatabase {
-    private client = new pg.Client({
+    protected client = new pg.Client({
         user: 'postgres',
         host: 'localhost',
         database: 'lyrical',
