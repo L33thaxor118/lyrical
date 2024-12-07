@@ -1,3 +1,3 @@
 export interface Settings {
-    loadedPlaylistName?: String
+    loadedPlaylistName?: string
 }

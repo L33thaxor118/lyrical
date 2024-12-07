@@ -57,6 +57,6 @@ export class GeniusAuthenticator implements Authenticator {
                 scope: "me",
             })}`
             openUrl(authUrl)
-          })
+        })
     }
 }

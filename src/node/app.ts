@@ -73,7 +73,7 @@ export class Application {
 
     private async loadPlaylistIntoDatabase(playlist: SpotifyPlaylist, spotifyAccessToken: string, geniusAccessToken: string) {
         const updateProgress = this.terminalUI.printProgress("Loading songs in playlist...")
-        var processedSongs = 0
+        let processedSongs = 0
         try {
             await this.database.beginTransaction()
             for await (const song of this.musicRepo.getSongsInPlaylist(playlist, spotifyAccessToken)) {

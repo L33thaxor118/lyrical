@@ -3,7 +3,7 @@ export interface TerminalUI {
     printSuccessLine(message: string): void
     printErrorLine(message: string): void
     printLoading(message: string): Promise<void>
-    printYesNoQuestion(question: string): Promise<Boolean>
+    printYesNoQuestion(question: string): Promise<boolean>
     printOptions(title: string, options: Array<string>): Promise<number>
     printTextInput(title: string): Promise<string>
     printBanner(): void

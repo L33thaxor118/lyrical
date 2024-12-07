@@ -1,4 +1,4 @@
-import { Artist } from "./Artist.js";
+import { Artist } from "./Artist.js"
 
 export interface Song {
     id: string,

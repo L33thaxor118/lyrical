@@ -1,5 +1,5 @@
 import { LyricsRepository } from "./LyricsRepository.js"
-import Genius from "genius-lyrics";
+import Genius from "genius-lyrics"
 
 export class GeniusLyrics implements LyricsRepository {
     async getLyrics(accessToken: string, songName: string, artistName: string): Promise<string | null> {

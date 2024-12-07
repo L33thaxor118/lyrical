@@ -12,30 +12,30 @@ import { Postgres } from './data/db/Postgres.js'
 import { DefaultEmbeddingRepository } from './data/embeddings/DefaultEmbeddingRepository.js'
 
 async function main() {
-  dotenv.config()
-  const spotifyAuthenticator = new SpotifyAuthenticator()
-  const geniusAuthenticator = new GeniusAuthenticator()
-  const songRepository = new SpotifyMusic()
-  const database = new Postgres()
-  const settingsRepo = new DefaultSettings(database)
-  const lyricsRepo = new GeniusLyrics()
-  const lyricsPreprocessor = new GeniusLyricsPreprocessor()
-  const embeddingRepo = new DefaultEmbeddingRepository()
-  const terminalUi = new DefaultTerminalUI()
-  const app = new Application(
-      spotifyAuthenticator, 
-      geniusAuthenticator, 
-      songRepository, 
-      lyricsRepo, 
-      settingsRepo, 
-      terminalUi,
-      lyricsPreprocessor,
-      embeddingRepo,
-      database
-  )
-  await app.run()
-  delay(100)
-  process.exit()
+    dotenv.config()
+    const spotifyAuthenticator = new SpotifyAuthenticator()
+    const geniusAuthenticator = new GeniusAuthenticator()
+    const songRepository = new SpotifyMusic()
+    const database = new Postgres()
+    const settingsRepo = new DefaultSettings(database)
+    const lyricsRepo = new GeniusLyrics()
+    const lyricsPreprocessor = new GeniusLyricsPreprocessor()
+    const embeddingRepo = new DefaultEmbeddingRepository()
+    const terminalUi = new DefaultTerminalUI()
+    const app = new Application(
+        spotifyAuthenticator, 
+        geniusAuthenticator, 
+        songRepository, 
+        lyricsRepo, 
+        settingsRepo, 
+        terminalUi,
+        lyricsPreprocessor,
+        embeddingRepo,
+        database
+    )
+    await app.run()
+    delay(100)
+    process.exit()
 }
 
 main()

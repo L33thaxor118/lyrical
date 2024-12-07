@@ -10,6 +10,7 @@
     "buildservices": "docker-compose -f ./docker-compose.yml build",
     "startservices": "docker-compose -f ./docker-compose.yml up --force-recreate",
     "notebook": "open http://localhost:8888/notebooks/test.ipynb",
+    "lint": "eslint ./src/node --fix",
     "pretest": "npx tsc",
     "test": "node build/test.js",
     "prestart": "npx tsc",
@@ -38,9 +39,15 @@
     "terminal-kit": "^3.1.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.16.0",
     "@types/express": "^5.0.0",
     "@types/node": "^22.9.0",
     "@types/terminal-kit": "^2.5.6",
-    "typescript": "^5.6.3"
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0",
+    "eslint": "^9.16.0",
+    "globals": "^15.13.0",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.17.0"
   }
 }

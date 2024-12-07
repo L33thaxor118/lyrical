@@ -6,8 +6,8 @@ import { Song } from "../../model/Song.js"
 export class SpotifyMusic implements MusicRepository {
     async getPlaylists(accessToken: string): Promise<Array<SpotifyPlaylist>> {
         const response = await axios.get(
-             'https://api.spotify.com/v1/me/playlists', 
-             {
+            'https://api.spotify.com/v1/me/playlists', 
+            {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                     'Content-Type': 'application/json'
@@ -22,15 +22,15 @@ export class SpotifyMusic implements MusicRepository {
     }
 
     async *getSongsInPlaylist(playlist: SpotifyPlaylist, accessToken: string): AsyncGenerator<Song> {
-        let nextUrl: string | null = playlist.tracks.href;
+        let nextUrl: string | null = playlist.tracks.href
 
         while (nextUrl) {
             const response: any = await axios.get(
                 nextUrl, 
                 {
                     headers: {
-                       Authorization: `Bearer ${accessToken}`,
-                       'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
                     },
                 }
             )

@@ -54,7 +54,7 @@ export class SpotifyAuthenticator implements Authenticator {
                 scope: "playlist-read-private",
             })}`
             openUrl(authUrl)
-          })
+        })
     }
 }
 

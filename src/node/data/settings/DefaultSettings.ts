@@ -1,6 +1,6 @@
-import { Settings } from "../../model/Settings.js";
-import { AppDatabase } from "../db/AppDatabase.js";
-import { SettingsRepository } from "./SettingsRepository.js";
+import { Settings } from "../../model/Settings.js"
+import { AppDatabase } from "../db/AppDatabase.js"
+import { SettingsRepository } from "./SettingsRepository.js"
 
 export class DefaultSettings implements SettingsRepository {
     constructor(
