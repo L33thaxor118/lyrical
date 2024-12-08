@@ -57,9 +57,9 @@ export class Application {
         const inputEmbedding = await this.embeddingRepo.getEmbedding(input)
         const matchingSongs = await this.database.similarityQuery(inputEmbedding)
         this.terminalUI.printNewLine()
-        for (const song of matchingSongs) {
-            this.terminalUI.printSuccessLine(`${song.title} by ${song.artist}`)
-        }
+        matchingSongs.forEach((song, index)=>{
+            this.terminalUI.printSuccessLine(`${index+1}. ${song.title} by ${song.artist}`)
+        })
     }
 
     private async loadPlaylistIntoDatabase(playlist: SpotifyPlaylist) {
