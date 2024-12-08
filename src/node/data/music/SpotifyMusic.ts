@@ -2,9 +2,16 @@ import axios from "axios"
 import { MusicRepository } from "./MusicRepository.js"
 import { SpotifyPlaylist } from "../../model/SpotifyPlaylist.js"
 import { Song } from "../../model/Song.js"
+import { SpotifyAuthenticator } from "../../auth/SpotifyAuthenticator.js"
 
 export class SpotifyMusic implements MusicRepository {
-    async getPlaylists(accessToken: string): Promise<Array<SpotifyPlaylist>> {
+
+    constructor(
+        private authenticator: SpotifyAuthenticator
+    ) {}
+
+    async getPlaylists(): Promise<Array<SpotifyPlaylist>> {
+        const accessToken = await this.authenticator.getAccessToken()
         const response = await axios.get(
             'https://api.spotify.com/v1/me/playlists', 
             {
@@ -21,7 +28,9 @@ export class SpotifyMusic implements MusicRepository {
         }
     }
 
-    async *getSongsInPlaylist(playlist: SpotifyPlaylist, accessToken: string): AsyncGenerator<Song> {
+    async *getSongsInPlaylist(playlist: SpotifyPlaylist): AsyncGenerator<Song> {
+        const accessToken = await this.authenticator.getAccessToken()
+
         let nextUrl: string | null = playlist.tracks.href
 
         while (nextUrl) {

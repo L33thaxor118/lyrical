@@ -9,6 +9,8 @@ export class GeniusAuthenticator implements Authenticator {
 
     private callbackPort = 8889
 
+    private accessToken: string | null = null
+
     private async waitForCodeOnCallbackServer(): Promise<string> {
         return new Promise((resolve, reject)=>{
             const expressApp = express()
@@ -30,6 +32,9 @@ export class GeniusAuthenticator implements Authenticator {
 
     async getAccessToken(): Promise<string> {
         return new Promise((resolve, reject)=>{
+            if (this.accessToken != null) {
+                resolve(this.accessToken)
+            }
             const geniusClientId = process.env.GENIUS_CLIENT_ID
             const geniusClientSecret = process.env.GENIUS_CLIENT_SECRET
             if (geniusClientId == null || geniusClientId == null) {
@@ -44,6 +49,7 @@ export class GeniusAuthenticator implements Authenticator {
                     client_id: geniusClientId,
                     client_secret: geniusClientSecret,
                 })).then((response)=>{
+                    this.accessToken = response.data.access_token
                     resolve(response.data.access_token)
                 }).catch(()=>{
                     reject("Failed to authenticate!")

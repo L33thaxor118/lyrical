@@ -38,7 +38,7 @@ export class Postgres implements AppDatabase {
             await this.client.query(extensionInstallQuery)
             await this.client.query(createSongsTableQuery)
             await this.client.query(createSettingsTableQuery)
-        } catch(e) {
+        } catch {
             this.disconnect()
         }
     }

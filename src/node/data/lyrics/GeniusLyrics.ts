@@ -1,8 +1,14 @@
+import { GeniusAuthenticator } from "../../auth/GeniusAuthenticator.js"
 import { LyricsRepository } from "./LyricsRepository.js"
 import Genius from "genius-lyrics"
 
 export class GeniusLyrics implements LyricsRepository {
-    async getLyrics(accessToken: string, songName: string, artistName: string): Promise<string | null> {
+    constructor(
+        private authenticator: GeniusAuthenticator
+    ) {}
+
+    async getLyrics(songName: string, artistName: string): Promise<string | null> {
+        const accessToken = await this.authenticator.getAccessToken()
         try {
             const client = new Genius.Client(accessToken)
             const searches = await client.songs.search(`${songName} ${artistName}`)

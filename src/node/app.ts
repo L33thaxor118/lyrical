@@ -1,4 +1,3 @@
-import { Authenticator } from "./auth/Authenticator"
 import { LyricsRepository } from "./data/lyrics/LyricsRepository.js"
 import { SettingsRepository } from "./data/settings/SettingsRepository.js"
 import { MusicRepository } from "./data/music/MusicRepository.js"
@@ -12,8 +11,6 @@ import { SpotifyPlaylist } from "./model/SpotifyPlaylist.js"
 
 export class Application {
     constructor(
-        private spotifyAuth: Authenticator,
-        private geniusAuth: Authenticator,
         private musicRepo: MusicRepository,
         private lyricsRepo: LyricsRepository,
         private settingsRepo: SettingsRepository,
@@ -36,19 +33,13 @@ export class Application {
                     this.terminalUI.printLine("Goodbye!")
                     return
                 }
-                await this.terminalUI.printLoading("Authorizing Spotify")
-                const spotifyToken = await this.spotifyAuth.getAccessToken()
-                this.terminalUI.printSuccessLine("Done")
-                await this.terminalUI.printLoading("Authorizing Genius")
-                const geniusToken = await this.geniusAuth.getAccessToken()
-                this.terminalUI.printSuccessLine("Done")
-                await this.terminalUI.printLoading("Fetching your Spotify playlists")
-                const playlists = await this.musicRepo.getPlaylists(spotifyToken)
+                await this.terminalUI.printLoading("Fetching your playlists")
+                const playlists = await this.musicRepo.getPlaylists()
                 const selection = await this.terminalUI.printOptions("Choose a playlist:", playlists.map(playlist => playlist?.name))
                 const selectedPlaylist = playlists[selection]
                 this.terminalUI.clear()
                 await this.terminalUI.printLoading(`loading ${selectedPlaylist.name}. This might take a while for large playlists.`)
-                await this.loadPlaylistIntoDatabase(selectedPlaylist, spotifyToken, geniusToken)
+                await this.loadPlaylistIntoDatabase(selectedPlaylist)
                 await this.promptUserAndGetMatchingSong(settings)
             } else {
                 await this.promptUserAndGetMatchingSong(settings)
@@ -71,21 +62,21 @@ export class Application {
         }
     }
 
-    private async loadPlaylistIntoDatabase(playlist: SpotifyPlaylist, spotifyAccessToken: string, geniusAccessToken: string) {
+    private async loadPlaylistIntoDatabase(playlist: SpotifyPlaylist) {
         const updateProgress = this.terminalUI.printProgress("Loading songs in playlist...")
         let processedSongs = 0
         try {
             await this.database.beginTransaction()
-            for await (const song of this.musicRepo.getSongsInPlaylist(playlist, spotifyAccessToken)) {
+            for await (const song of this.musicRepo.getSongsInPlaylist(playlist)) {
                 const artistName = song.artists[0]?.name
                 if (artistName == null) {
                     continue
                 }
-                const lyrics = await this.lyricsRepo.getLyrics(geniusAccessToken, song.name, artistName)
+                const lyrics = await this.lyricsRepo.getLyrics(song.name, artistName)
                 if (lyrics == null) {
                     continue
                 }
-                const preprocessedLyrics = this.lyricsPreprocessor.preprocessLyrics(lyrics)
+                const preprocessedLyrics = await this.lyricsPreprocessor.preprocessLyrics(lyrics)
                 if (preprocessedLyrics == null) {
                     continue
                 }

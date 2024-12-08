@@ -9,6 +9,8 @@ export class SpotifyAuthenticator implements Authenticator {
 
     private callbackPort = 8888
 
+    private accessToken: string | null = null
+
     private async waitForCodeOnCallbackServer(): Promise<string> {
         return new Promise((resolve, reject)=>{
             const expressApp = express()
@@ -30,6 +32,9 @@ export class SpotifyAuthenticator implements Authenticator {
 
     async getAccessToken(): Promise<string> {
         return new Promise((resolve, reject)=>{
+            if (this.accessToken != null) {
+                resolve(this.accessToken)
+            }
             if (process.env.SPOTIFY_CLIENT_ID == null || process.env.SPOTIFY_CLIENT_SECRET == null) {
                 reject("SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET environment variables haven't been set!")
                 return
@@ -42,6 +47,7 @@ export class SpotifyAuthenticator implements Authenticator {
                     client_id: process.env.SPOTIFY_CLIENT_ID,
                     client_secret: process.env.SPOTIFY_CLIENT_SECRET,
                 })).then((response)=>{
+                    this.accessToken = response.data.access_token
                     resolve(response.data.access_token)
                 }).catch(()=>{
                     reject("Failed to authenticate!")

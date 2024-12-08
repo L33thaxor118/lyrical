@@ -55,7 +55,7 @@ export class DefaultTerminalUI implements TerminalUI {
 
     async printYesNoQuestion(question: string): Promise<boolean> {
         this.term.yellow(`${question} [Y|n]\n`)
-        return new Promise((resolve, _)=>{
+        return new Promise((resolve)=>{
             this.term.yesOrNo( { yes: [ 'y' , 'ENTER' ] , no: [ 'n' ] } , function( error , result ) {
                 if ( result ) {
                     resolve(true)

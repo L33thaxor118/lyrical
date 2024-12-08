@@ -7,24 +7,22 @@ import { DefaultSettings } from './data/settings/DefaultSettings.js'
 import { DefaultTerminalUI } from './ui/DefaultTerminal.js'
 import { delay } from './util/util.js'
 import { Application } from './app.js'
-import { GeniusLyricsPreprocessor } from './data/preprocessing/GeniusLyricsPreprocessor.js'
 import { Postgres } from './data/db/Postgres.js'
 import { DefaultEmbeddingRepository } from './data/embeddings/DefaultEmbeddingRepository.js'
+import { DefaultLyricsPreprocessor } from './data/preprocessing/DefaultLyricsPreprocessor.js'
 
 async function main() {
     dotenv.config()
     const spotifyAuthenticator = new SpotifyAuthenticator()
-    const geniusAuthenticator = new GeniusAuthenticator()
-    const songRepository = new SpotifyMusic()
+    const songRepository = new SpotifyMusic(spotifyAuthenticator)
     const database = new Postgres()
     const settingsRepo = new DefaultSettings(database)
-    const lyricsRepo = new GeniusLyrics()
-    const lyricsPreprocessor = new GeniusLyricsPreprocessor()
+    const geniusAuthenticator = new GeniusAuthenticator()
+    const lyricsRepo = new GeniusLyrics(geniusAuthenticator)
+    const lyricsPreprocessor = new DefaultLyricsPreprocessor()
     const embeddingRepo = new DefaultEmbeddingRepository()
     const terminalUi = new DefaultTerminalUI()
     const app = new Application(
-        spotifyAuthenticator, 
-        geniusAuthenticator, 
         songRepository, 
         lyricsRepo, 
         settingsRepo, 
