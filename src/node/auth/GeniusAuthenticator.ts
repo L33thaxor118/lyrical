@@ -34,6 +34,7 @@ export class GeniusAuthenticator implements Authenticator {
         return new Promise((resolve, reject)=>{
             if (this.accessToken != null) {
                 resolve(this.accessToken)
+                return
             }
             const geniusClientId = process.env.GENIUS_CLIENT_ID
             const geniusClientSecret = process.env.GENIUS_CLIENT_SECRET

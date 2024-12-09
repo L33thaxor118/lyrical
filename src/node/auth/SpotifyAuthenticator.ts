@@ -34,6 +34,7 @@ export class SpotifyAuthenticator implements Authenticator {
         return new Promise((resolve, reject)=>{
             if (this.accessToken != null) {
                 resolve(this.accessToken)
+                return
             }
             if (process.env.SPOTIFY_CLIENT_ID == null || process.env.SPOTIFY_CLIENT_SECRET == null) {
                 reject("SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET environment variables haven't been set!")
