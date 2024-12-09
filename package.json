@@ -9,7 +9,6 @@
   "scripts": {
     "buildservices": "docker-compose -f ./docker-compose.yml build",
     "startservices": "docker-compose -f ./docker-compose.yml up --force-recreate",
-    "notebook": "open http://localhost:8888/notebooks/test.ipynb",
     "lint": "eslint ./src/node --fix",
     "pretest": "npx tsc",
     "test": "node build/test.js",
