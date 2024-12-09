@@ -3,11 +3,13 @@ import express from "express"
 import http from 'http'
 import querystring from "querystring"
 import openUrl from 'open'
-import { Authenticator } from "./Authenticator"
+import { Authenticator } from "./Authenticator.js"
+import pkceChallenge from "pkce-challenge"
 
 export class SpotifyAuthenticator implements Authenticator {
 
     private callbackPort = 8888
+    private clientId = "02300507b975448daab576cb6243a18c"
 
     private accessToken: string | null = null
 
@@ -31,34 +33,33 @@ export class SpotifyAuthenticator implements Authenticator {
     }
 
     async getAccessToken(): Promise<string> {
+        if (this.accessToken != null) {
+            return this.accessToken
+        }
+        const challenge = await pkceChallenge(64)
         return new Promise((resolve, reject)=>{
-            if (this.accessToken != null) {
-                resolve(this.accessToken)
-                return
-            }
-            if (process.env.SPOTIFY_CLIENT_ID == null || process.env.SPOTIFY_CLIENT_SECRET == null) {
-                reject("SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET environment variables haven't been set!")
-                return
-            }
             this.waitForCodeOnCallbackServer().then((code)=>{
                 axios.post("https://accounts.spotify.com/api/token", querystring.stringify({
                     grant_type: "authorization_code",
                     code: code,
                     redirect_uri: `http://localhost:${this.callbackPort}/callback`,
-                    client_id: process.env.SPOTIFY_CLIENT_ID,
-                    client_secret: process.env.SPOTIFY_CLIENT_SECRET,
+                    code_verifier: challenge.code_verifier,
+                    client_id: this.clientId
                 })).then((response)=>{
                     this.accessToken = response.data.access_token
                     resolve(response.data.access_token)
-                }).catch(()=>{
+                }).catch((e)=>{
+                    console.log(e)
                     reject("Failed to authenticate!")
                 })
             })
             const authUrl = `https://accounts.spotify.com/authorize?${querystring.stringify({
-                client_id: process.env.SPOTIFY_CLIENT_ID,
+                client_id: this.clientId,
                 response_type: "code",
                 redirect_uri: `http://localhost:${this.callbackPort}/callback`,
                 scope: "playlist-read-private",
+                code_challenge_method: 'S256',
+                code_challenge: challenge.code_challenge,
             })}`
             openUrl(authUrl)
         })
