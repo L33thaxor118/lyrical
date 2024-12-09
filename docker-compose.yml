@@ -30,5 +30,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: whatever
       POSTGRES_DB: lyrical
+
 volumes:
   pgvector_data:

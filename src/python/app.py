@@ -22,7 +22,7 @@ def embed_text():
         return jsonify({"error": str(e)}), 500
     
 @app.route('/preprocess', methods=['POST'])
-def embed_text():
+def preprocess():
     data = request.get_json()
     if not data or 'lyrics' not in data:
         return jsonify({"error": "Invalid request. 'lyrics' field is required."}), 400

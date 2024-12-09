@@ -1,6 +1,6 @@
 import re
 
-def preprocess_lyrics(lyrics: str) -> str | None:
+def preprocess_lyrics(lyrics: str):
     # Return None if the string is over 5000 characters
     if len(lyrics) > 5000:
         return None
