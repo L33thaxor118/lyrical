@@ -4,7 +4,7 @@ services:
   nlp_server:
     build:
       context: ./src/python
-      dockerfile: Dockerfile.nlpserver
+      dockerfile: Dockerfile
     ports:
       - "5001:5000"
 
@@ -30,12 +30,5 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: whatever
       POSTGRES_DB: lyrical
-
-  jupyter_notebook:
-      build: 
-        context: ./src/python
-        dockerfile: Dockerfile.jupyternotebook
-      ports:
-      - "8888:8888"
 volumes:
   pgvector_data:
