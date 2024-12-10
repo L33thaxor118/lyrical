@@ -112,4 +112,12 @@ export class Postgres implements AppDatabase {
             loadedPlaylistName: result.rows[0].loaded_playlist_name
         }
     }
+
+    async clear(): Promise<void> {
+        const deleteQuery = `
+            DELETE FROM settings;
+            DELETE FROM songs;
+        `
+        await this.client.query(deleteQuery)
+    }
 }

@@ -3,6 +3,6 @@ export interface SpotifyPlaylist {
     name: string,
     tracks: {
         href: string,
-        count: number
+        total: number
     }
 }

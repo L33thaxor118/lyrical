@@ -1,4 +1,3 @@
-import { GeniusAuthenticator } from './auth/GeniusAuthenticator.js'
 import { SpotifyAuthenticator } from './auth/SpotifyAuthenticator.js'
 import { GeniusLyrics } from './data/lyrics/GeniusLyrics.js'
 import { SpotifyMusic } from './data/music/SpotifyMusic.js'
@@ -17,8 +16,7 @@ async function main() {
     const songRepository = new SpotifyMusic(spotifyAuthenticator)
     const database = new Postgres()
     const settingsRepo = new DefaultSettings(database)
-    const geniusAuthenticator = new GeniusAuthenticator()
-    const lyricsRepo = new GeniusLyrics(geniusAuthenticator)
+    const lyricsRepo = new GeniusLyrics()
     const lyricsPreprocessor = new DefaultLyricsPreprocessor()
     const embeddingRepo = new DefaultEmbeddingRepository()
     const terminalUi = new DefaultTerminalUI()

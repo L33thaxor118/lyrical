@@ -44,8 +44,7 @@ export class DefaultTerminalUI implements TerminalUI {
     }
 
     async printLoading(message: string): Promise<void> {
-        this.term.cyan(`${message} `)
-        await this.term.spinner( 'impulse' )
+        this.term.cyan(`${message}...`)
         this.term('\n')
     }
 

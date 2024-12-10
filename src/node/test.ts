@@ -17,9 +17,10 @@ import { DefaultLyricsPreprocessor } from "./data/preprocessing/DefaultLyricsPre
 
 
 class MockLyricsRepository implements LyricsRepository {
-    getLyrics(songName: string): Promise<string | null> {
+    async getLyrics(songName: string): Promise<string | null> {
         const safeLyrics = testLyrics as { [key: string]: string }
         const lyrics: string = safeLyrics[songName]
+        await delay(1000)
         return new Promise((resolve)=>{
             resolve(lyrics)
         })
@@ -34,7 +35,7 @@ class MockSongsRepo implements MusicRepository {
                 name: "Test Playlist",
                 tracks: {
                     href: "whatever",
-                    count: 5
+                    total: 5
                 }
             }
         ]

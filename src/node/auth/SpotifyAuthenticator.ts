@@ -43,8 +43,8 @@ export class SpotifyAuthenticator implements Authenticator {
                     grant_type: "authorization_code",
                     code: code,
                     redirect_uri: `http://localhost:${this.callbackPort}/callback`,
-                    code_verifier: challenge.code_verifier,
-                    client_id: this.clientId
+                    client_id: this.clientId,
+                    code_verifier: challenge.code_verifier
                 })).then((response)=>{
                     this.accessToken = response.data.access_token
                     resolve(response.data.access_token)

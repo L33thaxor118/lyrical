@@ -11,4 +11,5 @@ export interface AppDatabase {
     similarityQuery(embedding: Array<number>): Promise<Array<DbSong>>
     updateSettings(settings: Settings): Promise<void>
     getSettings(): Promise<Settings>
+    clear(): Promise<void>
 }

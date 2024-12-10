@@ -23,11 +23,11 @@ export class Application {
     async run() {
         try {
             this.terminalUI.printBanner()
+            this.terminalUI.printLine("Welcome to Lyrical!")
             await this.database.connect()
             const settings = await this.settingsRepo.getSettings()
-            this.terminalUI.printLine("Welcome to Lyrical!")
             if (settings?.loadedPlaylistName == null) {
-                this.terminalUI.printLine("In order to fetch songs and lyrics you will need to authenticate with Spotify and Genius.")
+                this.terminalUI.printLine("In order to fetch songs you will need to authenticate with Spotify.")
                 const answer = await this.terminalUI.printYesNoQuestion("Proceed?")
                 if (answer === false) {
                     this.terminalUI.printLine("Goodbye!")
@@ -40,10 +40,10 @@ export class Application {
                 this.terminalUI.clear()
                 await this.terminalUI.printLoading(`loading ${selectedPlaylist.name}. This might take a while for large playlists.`)
                 await this.loadPlaylistIntoDatabase(selectedPlaylist)
-                await this.promptUserAndGetMatchingSong(settings)
-            } else {
-                await this.promptUserAndGetMatchingSong(settings)
+                this.terminalUI.clear()
             }
+            const latestSettings = await this.settingsRepo.getSettings()
+            await this.promptUser(latestSettings)
         } catch(error) {
             this.terminalUI.printErrorLine(`Error: ${getErrorMessage(error)}. Shutting down.`)
         } finally {
@@ -51,8 +51,21 @@ export class Application {
         }
     }
 
-    private async promptUserAndGetMatchingSong(settings: Settings) {
+    private async promptUser(settings: Settings) {
         this.terminalUI.printLine(`Loaded playlist: ${settings?.loadedPlaylistName}`)
+        const selection = await this.terminalUI.printOptions("What do you want to do?", ["Run query", "Unload playlist", "Exit"])
+        if (selection === 1) {
+            this.terminalUI.printLoading("Clearing Database")
+            await this.database.clear()
+            this.terminalUI.printLine("Database cleared. Goodbye!")
+        } else if (selection === 0) {
+            await this.querySongs()
+        } else {
+            this.terminalUI.printLine("Goodbye!")
+        }
+    }
+
+    private async querySongs() {
         const input = await this.terminalUI.printTextInput('Feed me a line: ')
         const inputEmbedding = await this.embeddingRepo.getEmbedding(input)
         const matchingSongs = await this.database.similarityQuery(inputEmbedding)
@@ -82,10 +95,7 @@ export class Application {
                 }
                 const embedding = await this.embeddingRepo.getEmbedding(preprocessedLyrics)
                 await this.database.insertSong(song.name, song.artists[0].name, lyrics, embedding)
-
-                // Throttle so we don't exceed API limits
-                delay(1000)
-                updateProgress(++processedSongs / playlist.tracks.count)
+                updateProgress(++processedSongs / playlist.tracks.total)
             }
             await this.settingsRepo.updateSettings({loadedPlaylistName: playlist.name})
             await this.database.commitTransaction()
